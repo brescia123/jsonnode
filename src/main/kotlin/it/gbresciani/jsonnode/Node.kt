@@ -1,12 +1,14 @@
 package it.gbresciani.jsonnode
 
-sealed class Node() {
+sealed class Node() : PrettyPrintable {
     object Null : Node() {
         override fun toString() = "null"
+        override fun print(indentation: String) = toString()
     }
 
     class Text(val text: String) : Node() {
-        override fun toString() = "\"$text\""
+        override fun toString() = text
+        override fun print(indentation: String) = "\"${toString()}\""
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other?.javaClass != javaClass) return false
@@ -18,13 +20,12 @@ sealed class Node() {
             return true
         }
 
-        override fun hashCode(): Int {
-            return text.hashCode()
-        }
+        override fun hashCode() = text.hashCode()
     }
 
     class Bool(val bool: Boolean) : Node() {
         override fun toString() = bool.toString()
+        override fun print(indentation: String) = toString()
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other?.javaClass != javaClass) return false
@@ -43,6 +44,7 @@ sealed class Node() {
 
     class Number(val number: kotlin.Number) : Node() {
         override fun toString() = number.toString()
+        override fun print(indentation: String) = toString()
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other?.javaClass != javaClass) return false
@@ -59,13 +61,13 @@ sealed class Node() {
         }
     }
 
-    class Array(val array: List<Node>) : Node(), PrettyPrintable {
+    class Array(val array: List<Node>) : Node() {
         override fun toString() = array.toString()
         override fun print(indentation: String) =
                 "${array.foldIndexed("[") { index: Int, acc: String, node: Node ->
                     val isObject = node is ObjectNode
-                    "$acc${if (isObject) "\n" else ""}${if (isObject) indentation else ""}${(node as? ObjectNode)?.print(indentation.plus("  ")) ?: node}, "
-                }}${if (this.array.getOrNull(0) is ObjectNode) "\n${indentation.dropLast(2)}" else ""}".dropLast(2) + "]"
+                    "$acc${if (isObject) "\n" else ""}${if (isObject) indentation else ""}${(node as? ObjectNode)?.print(indentation.plus("  ")) ?: node.print()}, "
+                }}${if (array.getOrNull(0) is ObjectNode) "\n${indentation.dropLast(2)}" else ""}".dropLast(2) + "]"
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
@@ -85,7 +87,7 @@ sealed class Node() {
 
     }
 
-    class ObjectNode(val map: Map<String, Node> = emptyMap()) : Node(), PrettyPrintable, Map<String, Node> by map {
+    class ObjectNode(val map: Map<String, Node> = emptyMap()) : Node(), Map<String, Node> by map {
 
         fun with(value: Any?, at: NodePath): ObjectNode = with(value.asNode(), at)
         fun with(value: Any?, at: String) = with(value.asNode(), at = NodePath(at))
@@ -149,10 +151,10 @@ sealed class Node() {
         override fun print(indentation: String): String =
                 "${toList().foldIndexed("{") { index: Int, acc: String, pair: Pair<String, Node> ->
                     val (key, node) = pair
-                    "$acc\n$indentation\"$key\": ${(node as? PrettyPrintable)?.print(indentation.plus("  ")) ?: node}"
+                    "$acc\n$indentation\"$key\": ${(node as? PrettyPrintable)?.print(indentation.plus("  ")) ?: node.print()}"
                 }}\n${indentation.dropLast(2)}}"
 
-        override fun toString(): String = print()
+        override fun toString(): String = map.toString()
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
