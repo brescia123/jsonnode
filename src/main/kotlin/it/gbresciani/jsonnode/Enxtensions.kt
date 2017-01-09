@@ -14,4 +14,4 @@ fun Any?.asNode(): Node = when (this) {
     else -> Node.Null
 }
 
-infix fun Node.at(key: String) = Node.ObjectNode().with(this, at = key)
+infix fun Node?.at(key: String) = Node.ObjectNode().with(this, at = key)
