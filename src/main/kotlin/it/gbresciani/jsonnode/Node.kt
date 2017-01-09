@@ -92,7 +92,10 @@ sealed class Node() : PrettyPrintable {
         fun with(value: Any?, at: NodePath): ObjectNode = with(value.asNode(), at)
         fun with(value: Any?, at: String) = with(value.asNode(), at = NodePath(at))
         fun with(value: Node, at: String) = with(value, at = NodePath(at))
-        fun merge(value: ObjectNode) = with(value, NodePath())
+        fun merge(value: ObjectNode?) = if (value == null)
+            this
+        else
+            with(value, NodePath())
 
         fun with(value: Node, at: NodePath): ObjectNode {
 
