@@ -31,5 +31,12 @@ class ExtensionsKtTest : ShouldSpec() {
                 }
             }
         }
+
+        "Node.at" {
+            should("create the an Object node with the given value at the given key") {
+                val objectNode = 3.asNode() at "key"
+                objectNode["key"] shouldBe Node.Number(3)
+            }
+        }
     }
 }

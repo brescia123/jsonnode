@@ -13,3 +13,5 @@ fun Any?.asNode(): Node = when (this) {
     is kotlin.Array<*> -> Node.Array(this.map(Any?::asNode))
     else -> Node.Null
 }
+
+infix fun Node.at(key: String) = Node.ObjectNode().with(this, at = key)
