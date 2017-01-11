@@ -2,7 +2,7 @@ package it.gbresciani.jsonnode
 
 
 /**
- *  Return a [Node] for [this]
+ *  Return an object of type [Node] for [this]
  *
  *  @return [Node] object from a generic [Any]
  */
