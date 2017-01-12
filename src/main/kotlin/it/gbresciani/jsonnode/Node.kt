@@ -1,6 +1,8 @@
 package it.gbresciani.jsonnode
 
-sealed class Node() : PrettyPrintable {
+import java.io.Serializable
+
+sealed class Node() : PrettyPrintable, Serializable {
     object Null : Node() {
         override fun toString() = "null"
         override fun print(indentation: String) = toString()
