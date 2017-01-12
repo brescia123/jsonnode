@@ -1,5 +1,16 @@
 package it.gbresciani.jsonnode
 
+/** Representation of possible object in Json structure
+ *
+ * Possible values:
+ * - Null : is a node with null as value
+ * - Text : is a node with text type as value
+ * - Bool : is a node with a boolean type as value
+ * - Number : is a node with a number type as value
+ * - Array : is a node with collection of type Node as value
+ * - ObjectNode : is a node with a map<key: String, value: Node> as value where key
+ *                represents the name of the field and value represents its value
+ */
 sealed class Node() : PrettyPrintable {
     object Null : Node() {
         override fun toString() = "null"
@@ -89,14 +100,75 @@ sealed class Node() : PrettyPrintable {
 
     class ObjectNode(val map: Map<String, Node> = emptyMap()) : Node(), Map<String, Node> by map {
 
+        /**
+         * Join an arbitrary value at a specified path with [this]
+         *
+         * Note:
+         * + if path doesn't exists it will create new path with passed value
+         * + if path already exists, it will override the old value in path with new value passed
+         * + if path partially exists it will add just the new part of path
+         *
+         * @param value the arbitrary object that must be added
+         * @param at [NodePath] that indicate the position where to place the Node
+         * @return an [ObjectNode] containing the resultant structure of old ObjectNode with new Node added
+         */
         fun with(value: Any?, at: NodePath): ObjectNode = with(value.asNode(), at)
+
+        /**
+         * Join an arbitrary value at a specified path with [this]
+         *
+         * Note:
+         * + if path doesn't exists it will create new path with passed value
+         * + if path already exists, it will override the old value in path with new value passed
+         *
+         * @param value the arbitrary object that must be added
+         * @param at the single level position where to place the Node
+         * @return an [ObjectNode] containing the resultant structure of old ObjectNode with new Node added
+         */
         fun with(value: Any?, at: String) = with(value.asNode(), at = NodePath(at))
+
+
+        /**
+         * Join a [Node] at a specified path with [this]
+         *
+         * Note:
+         * + if path doesn't exists it will create new path with passed value
+         * + if path already exists, it will override the old value in path with new value passed
+         * + if path partially exists it will add just the new part of path
+         *
+         * @param value the new Node that must be added
+         * @param at [NodePath] that indicate the position where to place the Node
+         * @return an [ObjectNode] containing the resultant structure of old ObjectNode with new Node added
+         */
         fun with(value: Node, at: String) = with(value, at = NodePath(at))
+
+        /**
+         * Let merge a new [ObjectNode] with [this]
+         *
+         * Note:
+         * + if value is [null] the method will return [this]
+         *
+         * @param value the [ObjectNode] that must be merged with [this]
+         * @return an [ObjectNode] containing the resultant structure
+         */
         fun merge(value: ObjectNode?) = if (value == null)
             this
         else
             with(value, NodePath())
 
+
+        /**
+         * Join a Node value at a specified path with [this]
+         *
+         * Note:
+         * + if path doesn't exists it will create new path with passed value
+         * + if path already exists, it will override the old value in path with new value passed
+         * + if path partially exists it will add just the new part of path
+         *
+         * @param value the new Node that must be added
+         * @param at [NodePath] that indicate the position where to place the Node
+         * @return an [ObjectNode] containing the resultant structure of old ObjectNode with new Node added
+         */
         fun with(value: Node, at: NodePath): ObjectNode {
 
             val temp = mutableMapOf(*map.toList().toTypedArray())
@@ -127,8 +199,20 @@ sealed class Node() : PrettyPrintable {
             return ObjectNode(temp)
         }
 
+        /**
+         * Return, if exists, the [Node] at specified path otherwise return null
+         *
+         * @param path collection of Strings that compose the path to find
+         * @return [Node] at specified path
+         */
         fun getNode(vararg path: String) = getNode(NodePath(*path))
 
+        /**
+         * Return, if exists, the [Node] at specified path otherwise return null
+         *
+         * @param path [NodePath] to find
+         * @return [Node] at specified path
+         */
         fun getNode(path: NodePath): Node? {
             val pathSize = path.size()
             if (pathSize == 0) return null
@@ -143,6 +227,13 @@ sealed class Node() : PrettyPrintable {
             else return node.getNode(tailPath)
         }
 
+        /**
+         * Return a new [ObjectNode] created from values present in [this] at specified
+         * paths
+         *
+         * @param paths arbitrary number of [NodePath] to find and retrieve
+         * @return new [ObjectNode] created
+         */
         fun extract(vararg paths: NodePath) = paths.fold(Node.ObjectNode()) { acc, path ->
             getNode(path)?.let { acc.with(it, at = path) } ?: acc
         }

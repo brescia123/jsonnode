@@ -1,5 +1,11 @@
 package it.gbresciani.jsonnode
 
+
+/**
+ *  Return an object of type [Node] for [this]
+ *
+ *  @return [Node] object from a generic [Any]
+ */
 fun Any?.asNode(): Node = when (this) {
     null -> Node.Null
     is Node -> this
