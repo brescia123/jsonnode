@@ -144,7 +144,7 @@ sealed class Node() : PrettyPrintable {
         }
 
         fun extract(vararg paths: NodePath) = paths.fold(Node.ObjectNode()) { acc, path ->
-            acc.with(getNode(path), at = path)
+            getNode(path)?.let { acc.with(it, at = path) } ?: empty()
         }
 
         companion object {
