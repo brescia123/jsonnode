@@ -10,6 +10,7 @@ buildscript {
 }
 
 apply plugin: 'kotlin'
+apply plugin: 'jacoco'
 
 repositories {
     mavenCentral()
@@ -25,5 +26,11 @@ test {
     //we want display the following test events
     testLogging {
         events "PASSED", "FAILED", "SKIPPED"
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
     }
 }
